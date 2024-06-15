@@ -6,9 +6,12 @@ internal sealed class DefaultConstructorRegistration : IRegistration
     {
         Lifetime = lifetime;
         Type = type;
+        Factory = () => Activator.CreateInstance(type);
     }
 
     public Lifetime Lifetime { get; }
     
     public Type Type { get; }
+    
+    public Func<Object> Factory { get; }
 }

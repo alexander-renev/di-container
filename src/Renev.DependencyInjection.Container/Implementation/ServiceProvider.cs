@@ -5,30 +5,33 @@ namespace Renev.DependencyInjection.Container.Implementation;
 
 internal sealed class ServiceProvider : IServiceProvider
 {
-    private readonly FrozenDictionary<Type, Func<object>> _registrations;
+    private readonly FrozenDictionary<Type, Func<object>> registrations;
     public ServiceProvider(List<IRegistration> registrations)
     {
         var factory = new Dictionary<Type, Func<object>>();
         foreach (var registration in registrations)
         {
-            switch (registration)
+            if (registration.Lifetime == Lifetime.Singleton)
             {
-                case DefaultConstructorRegistration def:
-                    var container = new Lazy<object>(() => Activator.CreateInstance(def.Type),
-                        LazyThreadSafetyMode.ExecutionAndPublication);
-                    factory[def.Type] = () => container.Value;
-                    break;
-                default:
-                    throw new InvalidOperationException($"Unsupported registration {registration.GetType().FullName}");
+                var container = new Lazy<object>(registration.Factory, LazyThreadSafetyMode.ExecutionAndPublication);
+                factory[registration.Type] = () => container.Value;
+            }
+            else if (registration.Lifetime == Lifetime.Transient)
+            {
+                factory[registration.Type] = registration.Factory;
+            }
+            else
+            {
+                throw new InvalidOperationException($"Unsupported lifetime {registration.Lifetime}");
             }
         }
 
-        _registrations = factory.ToFrozenDictionary();
+        this.registrations = factory.ToFrozenDictionary();
     }
 
     public T Resolve<T>()
     {
-        if (_registrations.TryGetValue(typeof(T), out var factory))
+        if (registrations.TryGetValue(typeof(T), out var factory))
         {
             return (T)factory();
         }

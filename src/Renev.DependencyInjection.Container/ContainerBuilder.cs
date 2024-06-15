@@ -13,6 +13,12 @@ public sealed class ContainerBuilder
         return this;
     }
     
+    public ContainerBuilder AddTransient<T>()
+    {
+        Registrations.Add(new DefaultConstructorRegistration(Lifetime.Transient, typeof(T)));
+        return this;
+    }
+    
     public IServiceProvider Build()
     {
         return new ServiceProvider(Registrations);

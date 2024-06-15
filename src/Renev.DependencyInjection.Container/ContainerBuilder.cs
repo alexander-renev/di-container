@@ -19,6 +19,18 @@ public sealed class ContainerBuilder
         return this;
     }
     
+    public ContainerBuilder AddSingleton<TContract, TImplementation>()
+    {
+        Registrations.Add(new DefaultConstructorRegistration(Lifetime.Singleton, typeof(TContract), typeof(TImplementation)));
+        return this;
+    }
+    
+    public ContainerBuilder AddTransient<TContract, TImplementation>()
+    {
+        Registrations.Add(new DefaultConstructorRegistration(Lifetime.Transient, typeof(TContract), typeof(TImplementation)));
+        return this;
+    }
+    
     public IServiceProvider Build()
     {
         return new ServiceProvider(Registrations);

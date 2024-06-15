@@ -6,6 +6,7 @@ namespace Renev.DependencyInjection.Container.Implementation;
 internal sealed class ServiceProvider : IServiceProvider
 {
     private readonly FrozenDictionary<Type, Func<object>> registrations;
+    
     public ServiceProvider(List<IRegistration> registrations)
     {
         var factory = new Dictionary<Type, Func<object>>();
@@ -13,12 +14,12 @@ internal sealed class ServiceProvider : IServiceProvider
         {
             if (registration.Lifetime == Lifetime.Singleton)
             {
-                var container = new Lazy<object>(registration.Factory, LazyThreadSafetyMode.ExecutionAndPublication);
+                var container = new Lazy<object>(() => registration.Factory(this), LazyThreadSafetyMode.ExecutionAndPublication);
                 factory[registration.Type] = () => container.Value;
             }
             else if (registration.Lifetime == Lifetime.Transient)
             {
-                factory[registration.Type] = registration.Factory;
+                factory[registration.Type] = () => registration.Factory(this);
             }
             else
             {

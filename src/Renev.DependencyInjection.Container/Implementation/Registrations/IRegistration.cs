@@ -6,5 +6,5 @@ internal interface IRegistration
     
     Type Type { get; }
     
-    Func<object> Factory { get; }
+    Func<IServiceProvider, object> Factory { get; }
 }

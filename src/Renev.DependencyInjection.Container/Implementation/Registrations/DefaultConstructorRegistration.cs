@@ -6,12 +6,19 @@ internal sealed class DefaultConstructorRegistration : IRegistration
     {
         Lifetime = lifetime;
         Type = type;
-        Factory = () => Activator.CreateInstance(type);
+        Factory = _ => Activator.CreateInstance(type);
+    }
+    
+    public DefaultConstructorRegistration(Lifetime lifetime, Type contract, Type implementation)
+    {
+        Lifetime = lifetime;
+        Type = contract;
+        Factory = _ => Activator.CreateInstance(implementation);
     }
 
     public Lifetime Lifetime { get; }
     
     public Type Type { get; }
     
-    public Func<Object> Factory { get; }
+    public Func<IServiceProvider, Object> Factory { get; }
 }

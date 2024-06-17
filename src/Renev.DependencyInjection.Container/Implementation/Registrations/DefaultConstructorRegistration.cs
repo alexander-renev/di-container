@@ -1,4 +1,9 @@
-﻿namespace Renev.DependencyInjection.Container.Implementation.Registrations;
+﻿using System.CodeDom.Compiler;
+using System.Reflection;
+using System.Reflection.Emit;
+using Microsoft.CSharp;
+
+namespace Renev.DependencyInjection.Container.Implementation.Registrations;
 
 internal sealed class DefaultConstructorRegistration : IRegistration
 {
@@ -6,19 +11,19 @@ internal sealed class DefaultConstructorRegistration : IRegistration
     {
         Lifetime = lifetime;
         Type = type;
-        Factory = _ => Activator.CreateInstance(type);
+        Factory = CodeGenerationHelper.CreateDefaultConstructorFactory(type);
     }
     
     public DefaultConstructorRegistration(Lifetime lifetime, Type contract, Type implementation)
     {
         Lifetime = lifetime;
         Type = contract;
-        Factory = _ => Activator.CreateInstance(implementation);
+        Factory = CodeGenerationHelper.CreateDefaultConstructorFactory(implementation);
     }
 
     public Lifetime Lifetime { get; }
     
     public Type Type { get; }
     
-    public Func<IServiceProvider, Object> Factory { get; }
+    public Func<IServiceProvider, object> Factory { get; }
 }

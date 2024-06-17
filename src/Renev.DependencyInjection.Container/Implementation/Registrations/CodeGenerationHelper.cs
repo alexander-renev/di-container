@@ -5,7 +5,7 @@ namespace Renev.DependencyInjection.Container.Implementation.Registrations;
 
 internal static class CodeGenerationHelper
 {
-    internal static Func<IServiceProvider, object> CreateDefaultConstructorFactory(Type implementation)
+    internal static Func<IServiceProvider, object> CreateConstructorFactory(Type implementation)
     {
         var name = "ProxyAssembly." + implementation.Assembly.GetName().Name + "." + Guid.NewGuid().ToString("N");
         var assembly = AssemblyBuilder.DefineDynamicAssembly(
@@ -16,9 +16,16 @@ internal static class CodeGenerationHelper
         type.DefineDefaultConstructor(MethodAttributes.Public | MethodAttributes.HideBySig);
         var delegateMethod = type.DefineMethod("DelegateMethod",
             MethodAttributes.Private, CallingConventions.Standard, typeof(object),
-            new[] { typeof(IServiceProvider) });
+            [typeof(IServiceProvider)]);
         var delegateMethodIl = delegateMethod.GetILGenerator();
-        delegateMethodIl.Emit(OpCodes.Newobj, implementation.GetConstructors()[0]);
+        var implementationCtor = implementation.GetConstructors()[0];
+        var getServiceMethod = typeof(IServiceProvider).GetMethod("Resolve");
+        foreach (var parameter in implementationCtor.GetParameters())
+        {
+            delegateMethodIl.Emit(OpCodes.Ldarg_1);
+            delegateMethodIl.Emit(OpCodes.Callvirt, getServiceMethod.MakeGenericMethod(parameter.ParameterType));
+        }
+        delegateMethodIl.Emit(OpCodes.Newobj, implementationCtor);
         delegateMethodIl.Emit(OpCodes.Ret);
 
         var factoryMethod = type.DefineMethod("FactoryMethod", MethodAttributes.Public,

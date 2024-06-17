@@ -5,20 +5,20 @@ using Microsoft.CSharp;
 
 namespace Renev.DependencyInjection.Container.Implementation.Registrations;
 
-internal sealed class DefaultConstructorRegistration : IRegistration
+internal sealed class ConstructorRegistration : IRegistration
 {
-    public DefaultConstructorRegistration(Lifetime lifetime, Type type)
+    public ConstructorRegistration(Lifetime lifetime, Type type)
     {
         Lifetime = lifetime;
         Type = type;
-        Factory = CodeGenerationHelper.CreateDefaultConstructorFactory(type);
+        Factory = CodeGenerationHelper.CreateConstructorFactory(type);
     }
     
-    public DefaultConstructorRegistration(Lifetime lifetime, Type contract, Type implementation)
+    public ConstructorRegistration(Lifetime lifetime, Type contract, Type implementation)
     {
         Lifetime = lifetime;
         Type = contract;
-        Factory = CodeGenerationHelper.CreateDefaultConstructorFactory(implementation);
+        Factory = CodeGenerationHelper.CreateConstructorFactory(implementation);
     }
 
     public Lifetime Lifetime { get; }
